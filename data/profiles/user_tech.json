@@ -1,0 +1,7 @@
+{
+  "id": "user_tech",
+  "interests": ["tech", "gaming"],
+  "post_frequency": 0.5,
+  "style": "informal",
+  "active_hours": [18, 19, 20, 21, 22]
+}

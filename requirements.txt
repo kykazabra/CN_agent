@@ -1,5 +1,4 @@
-langgraph
-langchain-openai
-python-dotenv
-pydantic
-pytest
+langgraph==0.1.0
+langchain-openai==0.1.0
+mastodon.py==1.8.0
+pyyaml==6.0

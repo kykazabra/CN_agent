@@ -1,8 +1,11 @@
+from langchain.chains.question_answering.map_reduce_prompt import messages
 from langgraph.graph import StateGraph, END
+from langgraph.graph.message import add_messages
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.pydantic_v1 import BaseModel
-from typing import Dict, Any
+from pydantic import BaseModel, Field
+from typing import Dict, Any, Literal, Union, Annotated, List
+from typing_extensions import TypedDict
 from src.models.user_profile import UserProfile
 from mastodon import Mastodon
 import random
@@ -10,132 +13,184 @@ import random
 
 # Структура для анализа тональности
 class SentimentAnalysis(BaseModel):
-    sentiment: str  # "positive", "neutral", "negative"
-    relevance: float  # 0.0–1.0
+    """Ananlysis about sentiment"""
+    sentiment: Literal["positive", "neutral", "negative"]
+    relevance: float  = Field(description='Could be number from 0 to 1')
+
+
+class Decision(BaseModel):
+    """Decision on what action to take"""
+    action: Literal['post', 'reply', 'like', 'sub', 'unsub', 'pass'] = Field(description="""
+post - написать новый пост у себя на странице
+reply - ответить на сообщение
+like - оценить сообщение
+sub - подписаться на пользователя
+unsub - отписаться от пользователя
+pass - продолжить и ничего не делать
+""")
 
 
 # Состояние графа
-class AgentState(Dict[str, Any]):
+class AgentState(TypedDict):
     profile: UserProfile
     context: Dict[str, Any]
     action: str
     content: str
+    chat_history: List[Dict[str, str]]
 
 
-def build_graph(profile: UserProfile, mastodon: Mastodon, llm_config: Dict) -> StateGraph:
+def build_graph(profile: UserProfile, mastodon: Mastodon, checkpointer: Any, llm_config: Dict) -> StateGraph:
     """Создает граф логики для управления поведением агента."""
-    llm = ChatOpenAI(
-        model=llm_config['model'],
-        temperature=llm_config['temperature'],
-        max_tokens=llm_config['max_tokens']
-    )
+    llm = ChatOpenAI(**llm_config)
 
     graph = StateGraph(AgentState)
 
-    # Узел анализа контекста
+
+    def create_post(history: List) -> str:
+        content = llm.invoke(history + [{'role': 'system', 'content': 'Ты решил написать пост, придумай текст для поста. В ответ выдавай только текст!'}]).content
+
+        mastodon.status_post(content)
+
+        return content
+
+
+    def like_post(post_id: int) -> None:
+        mastodon.status_favourite(post_id)
+
+        return
+
+    def reply_to_post(post_id: int, history: List) -> str:
+        reply = llm.invoke(history + [{'role': 'system', 'content': 'Ты решил написать ответ пользователю'}]).content
+
+        mastodon.status_post(reply, in_reply_to_id=post_id)
+
+        return reply
+
+    def sub_to_user(nick: str) -> None:
+        results = mastodon.account_search(nick, limit=1)
+
+        user_id = results[0]['id']
+        mastodon.account_follow(user_id)
+
+        return
+
+    def unsub_from_user(nick: str) -> None:
+        results = mastodon.account_search(nick, limit=1)
+
+        user_id = results[0]['id']
+        mastodon.account_unfollow(user_id)
+
+        return
+
     def analyze_context(state: AgentState) -> AgentState:
         context = state.get('context', {})
-        if not context:
-            state['context'] = {'sentiment': 'neutral', 'relevance': 0.5}
-            return state
 
-        prompt = ChatPromptTemplate.from_template(
-            "Проанализируй текст поста: {text}\n"
-            "Определи тональность (позитивная, нейтральная, негативная) и релевантность для интересов: {interests}"
-        )
-        chain = prompt | llm.with_structured_output(SentimentAnalysis)
-        result = chain.invoke({
-            'text': context.get('text', ''),
-            'interests': ', '.join(profile.interests)
-        })
-        state['context'] = {
-            'sentiment': result.sentiment,
-            'relevance': result.relevance,
-            'text': context.get('text', '')
-        }
-        return state
+        if not state.get('chat_history'):
+            state['chat_history'] = [{
+                'role': 'system',
+                'content': f'Тебя зовут {profile.nick}, твои интересы: {profile.interests}, ты общаешься в стиле: {profile.style}'
+            }]
 
-    # Узел принятия решений
-    def decide_action(state: AgentState) -> AgentState:
-        relevance = state['context'].get('relevance', 0.5)
-        sentiment = state['context'].get('sentiment', 'neutral')
+        if state['context']['is_mention']:
+            state['chat_history'].append({'role': 'user', 'content': f'Пользователь {context.get("user")} написал тебе сообщение: {context.get("text")}'})
 
-        # Вероятности действий
-        actions = {
-            'post': profile.post_frequency / 24,  # Частота в час
-            'comment': relevance * 0.3 if sentiment != 'negative' else 0.1,
-            'like': relevance * 0.5,
-            'reply': 0.8 if state['context'].get('is_mention', False) else 0.0
-        }
-        state['action'] = random.choices(
-            list(actions.keys()),
-            weights=list(actions.values()),
-            k=1
-        )[0]
-        return state
-
-    # Узел генерации контента
-    def generate_content(state: AgentState) -> AgentState:
-        action = state['action']
-        prompt_map = {
-            'post': (
-                "Напиши пост в стиле {style} на тему, связанную с интересами: {interests}"
-            ),
-            'comment': (
-                "Напиши комментарий в стиле {style} к посту: {text}"
-            ),
-            'reply': (
-                "Ответь на упоминание в стиле {style}: {text}"
-            )
-        }
-
-        if action in prompt_map:
-            prompt = ChatPromptTemplate.from_template(prompt_map[action])
-            chain = prompt | llm
-            content = chain.invoke({
-                'style': profile.style,
-                'interests': ', '.join(profile.interests),
-                'text': state['context'].get('text', '')
-            }).content
-            state['content'] = content
         else:
-            state['content'] = None
+            state['chat_history'].append({'role': 'user',
+                                       'content': f'Пользователь {context.get("user")} написал пост: {context.get("text")}'})
+
         return state
 
-    # Узел взаимодействия
-    def interact(state: AgentState) -> AgentState:
-        action = state['action']
-        content = state['content']
-        if action == 'post' and content:
-            mastodon.status_post(content)
-        elif action == 'comment' and content:
-            post_id = state['context'].get('post_id')
-            if post_id:
-                mastodon.status_post(content, in_reply_to_id=post_id)
-        elif action == 'reply' and content:
-            mention_id = state['context'].get('mention_id')
-            if mention_id:
-                mastodon.status_post(content, in_reply_to_id=mention_id)
-        elif action == 'like':
-            post_id = state['context'].get('post_id')
-            if post_id:
-                mastodon.status_favourite(post_id)
+    def decide_action(state: AgentState) -> AgentState:
+        # Вероятности действий
+
+        messages = state['chat_history'] + [{'role': 'system', 'content': 'Прими решение, что делать дальше'}]
+
+        result = llm.with_structured_output(Decision).invoke(messages)
+
+        state['action'] = result.action
+
         return state
+
+    def make_action(state: AgentState) -> AgentState:
+        action = state['action']
+
+        if action == 'post':
+            try:
+                content = create_post(history=state['chat_history'])
+                state['content'] = content
+                state['chat_history'].append({'role': 'system', 'content': f'Ты написал пост у себя на странице: {content}'})
+
+            except Exception as e:
+                state['chat_history'].append({'role': 'system', 'content': f'У тебя не получилось написать пост у себя на странице по причине: {e}'})
+
+        if action == 'reply':
+            try:
+                content = reply_to_post(post_id=state['context'].get('post_id'), history=state['chat_history'])
+                state['content'] = content
+                state['chat_history'].append({'role': 'system', 'content': f'Ты ответил пользователю: {content}'})
+
+            except Exception as e:
+                import traceback
+                print(traceback.format_exc())
+                state['chat_history'].append({'role': 'system',
+                                           'content': f'У тебя не получилось ответить пользователю по причине: {e}'})
+
+        if action == 'like':
+            try:
+                like_post(post_id=state['context'].get('post_id'))
+                state['content'] = None
+                state['chat_history'].append({'role': 'system', 'content': 'Ты поставил лайк последнему посту пользователя'})
+
+            except Exception as e:
+                state['chat_history'].append({'role': 'system',
+                                           'content': f'У тебя не получилось поставить лайк последнему посту пользователя по причине: {e}'})
+
+        if action == 'sub':
+            try:
+                sub_to_user(nick=state['context'].get('user'))
+                state['content'] = None
+                state['chat_history'].append({'role': 'system', 'content': 'Ты подписался на пользователя'})
+
+            except Exception as e:
+                state['chat_history'].append({'role': 'system',
+                                           'content': f'У тебя не получилось подписаться на пользователяя по причине: {e}'})
+
+        if action == 'unsub':
+            try:
+                unsub_from_user(nick=state['context'].get('user'))
+                state['content'] = None
+                state['chat_history'].append({'role': 'system', 'content': 'Ты отписался от пользователя'})
+
+            except Exception as e:
+                state['chat_history'].append({'role': 'system',
+                                           'content': f'У тебя не получилось отписаться от пользователя по причине: {e}'})
+
+        return state
+
+    def route_by_status(state: AgentState) -> Literal["make_action", "end"]:
+        if state['action'] != 'pass':
+            return 'make_action'
+
+        else:
+            return "end"
 
     # Определение узлов
     graph.add_node("analyze_context", analyze_context)
     graph.add_node("decide_action", decide_action)
-    graph.add_node("generate_content", generate_content)
-    graph.add_node("interact", interact)
+    graph.add_node("make_action", make_action)
 
     # Определение ребер
     graph.set_entry_point("analyze_context")
     graph.add_edge("analyze_context", "decide_action")
-    graph.add_edge("decide_action", "generate_content")
-    graph.add_conditional_edges(
-        "generate_content",
-        lambda state: "interact" if state['content'] or state['action'] == 'like' else END
-    )
-    graph.add_edge("interact", END)
+    graph.add_edge("make_action", "decide_action")
 
-    return graph.compile()
+    graph.add_conditional_edges(
+        "decide_action",
+        route_by_status,
+        {
+            "make_action": "make_action",
+            "end": END
+        }
+    )
+
+    return graph.compile(checkpointer=checkpointer)

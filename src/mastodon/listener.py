@@ -14,28 +14,29 @@ class BotStreamListener(StreamListener):
         self.profile = profile
         self.mastodon = mastodon
 
-    # def on_update(self, status: dict):
-    #     """Обрабатывает новые посты в ленте."""
-    #
-    #     user =  status['account']['username']
-    #
-    #     if user != self.profile.nick:
-    #         text = BeautifulSoup(status['content'], "html.parser").get_text()
-    #         post_id = status['id']
-    #
-    #         state = {
-    #             'profile': self.profile,
-    #             'context': {
-    #                 'text': text,
-    #                 'post_id': post_id,
-    #                 'is_mention': False,
-    #                 'user': user
-    #             }
-    #         }
-    #
-    #         config = {"configurable": {"thread_id": user}, "recursion_limit": 8}
-    #
-    #         self.graph.invoke(state, config=config)
+    def on_update(self, status: dict):
+        """Обрабатывает новые посты в ленте."""
+
+        user =  status['account']['username']
+        print(status)
+
+        if user != self.profile.nick and not status['in_reply_to_id']:
+            text = BeautifulSoup(status['content'], "html.parser").get_text()
+            post_id = status['id']
+
+            state = {
+                'profile': self.profile,
+                'context': {
+                    'text': text,
+                    'post_id': post_id,
+                    'is_mention': False,
+                    'user': user
+                }
+            }
+
+            config = {"configurable": {"thread_id": user}, "recursion_limit": 8}
+
+            self.graph.invoke(state, config=config)
 
     def on_notification(self, notification: dict):
         """Обрабатывает упоминания бота."""

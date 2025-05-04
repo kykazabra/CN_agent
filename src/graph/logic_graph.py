@@ -11,13 +11,6 @@ from mastodon import Mastodon
 import random
 
 
-# Структура для анализа тональности
-class SentimentAnalysis(BaseModel):
-    """Ananlysis about sentiment"""
-    sentiment: Literal["positive", "neutral", "negative"]
-    relevance: float  = Field(description='Could be number from 0 to 1')
-
-
 class Decision(BaseModel):
     """Decision on what action to take"""
     action: Literal['post', 'reply', 'like', 'sub', 'unsub', 'pass'] = Field(description="""
@@ -90,6 +83,12 @@ def build_graph(profile: UserProfile, mastodon: Mastodon, checkpointer: Any, llm
                 'role': 'system',
                 'content': f'Тебя зовут {profile.nick}, твои интересы: {profile.interests}, ты общаешься в стиле: {profile.style}'
             }]
+
+        if len(state['chat_history']) >= 8:
+            state['chat_history'] = [{
+                'role': 'system',
+                'content': f'Тебя зовут {profile.nick}, твои интересы: {profile.interests}, ты общаешься в стиле: {profile.style}'
+            }] + state['chat_history'][len(state['chat_history'])-8:]
 
         if state['context']['is_mention']:
             state['chat_history'].append({'role': 'user', 'content': f'Пользователь {context.get("user")} написал тебе сообщение: {context.get("text")}'})

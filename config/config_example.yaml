@@ -1,0 +1,20 @@
+mastodon:
+  access_token: "<Mastodon API Key>"  # Необходимо получить в настройках пользователя в интерфейсе Mastodon
+  api_base_url: "https://aus.social"  # Сервер Mastodon, к которому будет подключен бот
+user_profile:
+  interests: ["технологии", "ИИ", "игры"]  # Интересы агента
+  style: "неформальный"  # Стиль общения агента
+  nick: "tcar"  # Ник агента
+llm:
+  model: "gpt-4o-mini"  # LLM для работы агента
+  api_key: "sk-..."  # Ключ API OpenAI
+  base_url: "https://api.proxyapi.ru/openai/v1"  # Хостинг API OpenAI
+  temperature: 0.7  # Температура модели (float, 0 - строгость и точность, 2 - креатив и неопределенность)
+  max_tokens: 200  # Лимит токенов на один ответ модели
+langsmith:  # Настройки для логирования в langsmith
+  LANGSMITH_TRACING: "true"
+  LANGSMITH_ENDPOINT: "https://api.smith.langchain.com"
+  LANGSMITH_API_KEY: "<Langsmith API key>"
+  LANGSMITH_PROJECT: "diplom_bot"
+app:
+  sqlite_path: "data/memory.sqlite"  # Путь сорхранения БД памяти

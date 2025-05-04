@@ -32,11 +32,11 @@ def main():
             checkpointer=memory,
             llm_config=config['llm']
         )
-        from langchain_core.runnables.graph import CurveStyle, MermaidDrawMethod, NodeStyles
-        from PIL import Image
-        from io import BytesIO
-
-        Image.open(BytesIO(graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API))).save('data/agent.png', 'PNG')
+        # from langchain_core.runnables.graph import CurveStyle, MermaidDrawMethod, NodeStyles
+        # from PIL import Image
+        # from io import BytesIO
+        #
+        # Image.open(BytesIO(graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API))).save('data/agent.png', 'PNG')
 
         listener = BotStreamListener(graph, profile, mastodon)
         mastodon.stream_user(listener)

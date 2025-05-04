@@ -81,7 +81,7 @@ def build_graph(profile: UserProfile, mastodon: Mastodon, checkpointer: Any, llm
         if not state.get('chat_history'):
             state['chat_history'] = [{
                 'role': 'system',
-                'content': f'Тебя зовут {profile.nick}, твои интересы: {profile.interests}, ты общаешься в стиле: {profile.style}'
+                'content': f'Тебя зовут {profile.nick}, твои интересы: {profile.interests}, ты общаешься в стиле: {profile.style}. Не выбирай одно и то же действие 2 раза для реакции на один ввод от пользователя!'
             }]
 
         if len(state['chat_history']) >= 8:

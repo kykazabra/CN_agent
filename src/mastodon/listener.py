@@ -16,12 +16,10 @@ class BotStreamListener(StreamListener):
 
     def on_update(self, status: dict):
         """Обрабатывает новые посты в ленте."""
-
+        text = BeautifulSoup(status['content'], "html.parser").get_text()
         user =  status['account']['username']
-        print(status)
 
-        if user != self.profile.nick and not status['in_reply_to_id']:
-            text = BeautifulSoup(status['content'], "html.parser").get_text()
+        if user != self.profile.nick and not status['in_reply_to_id'] and '@tcar' not in text:
             post_id = status['id']
 
             state = {

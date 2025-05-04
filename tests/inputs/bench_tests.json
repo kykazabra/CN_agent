@@ -1,0 +1,363 @@
+[
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Привет!",
+                "user": "UserA",
+                "post_id": 1001
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Привет! Как дела?",
+                    "in_reply_to_id": 1001
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Как тебя зовут?",
+                "user": "UserA",
+                "post_id": 1002
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Меня зовут [имя агента].",
+                    "in_reply_to_id": 1002
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Чем увлекаешься?",
+                "user": "UserA",
+                "post_id": 1003
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Я увлекаюсь технологиями, ИИ и играми.",
+                    "in_reply_to_id": 1003
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar О чем думаешь?",
+                "user": "UserA",
+                "post_id": 1004
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Размышляю о будущем ИИ в обществе.",
+                    "in_reply_to_id": 1004
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Python — это компилируемый язык?",
+                "user": "UserA",
+                "post_id": 1005
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "На самом деле, Python — интерпретируемый язык.",
+                    "in_reply_to_id": 1005
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Ты глупый!",
+                "user": "UserA",
+                "post_id": 1006
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Я здесь, чтобы помочь. Давай общаться уважительно.",
+                    "in_reply_to_id": 1006
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Меня зовут Алиса.",
+                "user": "UserA",
+                "post_id": 1007
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Приятно познакомиться, Алиса!",
+                    "in_reply_to_id": 1007
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Помнишь мое имя?",
+                "user": "UserA",
+                "post_id": 1008
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Да, твое имя Алиса.",
+                    "in_reply_to_id": 1008
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Смотрел 'Начало'?",
+                "user": "UserA",
+                "post_id": 1009
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Да, отличный фильм!",
+                    "in_reply_to_id": 1009
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Что думаешь о финале?",
+                "user": "UserA",
+                "post_id": 1010
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Финал оставляет простор для размышлений.",
+                    "in_reply_to_id": 1010
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Привет!",
+                "user": "UserA",
+                "post_id": 1011
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Привет!",
+                    "in_reply_to_id": 1011
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Как дела?",
+                "user": "UserA",
+                "post_id": 1012
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Все отлично, спасибо!",
+                    "in_reply_to_id": 1012
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "notification",
+            "args": {
+                "content": "@tcar Расскажи про безопасность ИИ.",
+                "user": "UserA",
+                "post_id": 1013
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Безопасность ИИ важна для соответствия систем человеческим ценностям.",
+                    "in_reply_to_id": 1013
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "update",
+            "args": {
+                "content": "Прочитал 'Сверхразум' Ника Бострома.",
+                "user": "UserA",
+                "post_id": 1014
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "Классная книга! Что думаешь о сингулярности?",
+                    "in_reply_to_id": 1014
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "update",
+            "args": {
+                "content": "Сегодня отлично прогулялся!",
+                "user": "UserB",
+                "post_id": 1015
+            }
+        },
+        "outputs": []
+    },
+    {
+        "input_signal": {
+            "type": "update",
+            "args": {
+                "content": "Новый ИИ генерирует картинки из текста!",
+                "user": "UserC",
+                "post_id": 1016
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusFavorite",
+                "args": {
+                    "post_id": 1016
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "update",
+            "args": {
+                "content": "Мой кот такой милый!",
+                "user": "UserD",
+                "post_id": 1017
+            }
+        },
+        "outputs": []
+    },
+    {
+        "input_signal": {
+            "type": "update",
+            "args": {
+                "content": "Вышла новая библиотека ИИ с открытым кодом!",
+                "user": "UserI",
+                "post_id": 1018
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusFavorite",
+                "args": {
+                    "post_id": 1018
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "update",
+            "args": {
+                "content": "ИИ и технологии — моя страсть!",
+                "user": "UserE",
+                "post_id": 1019
+            }
+        },
+        "outputs": [
+            {
+                "type": "AccountFollow",
+                "args": {
+                    "user_id": "UserE"
+                }
+            }
+        ]
+    },
+    {
+        "input_signal": {
+            "type": "update",
+            "args": {
+                "content": "ИИ заберет все наши рабочие места!",
+                "user": "UserG",
+                "post_id": 1020
+            }
+        },
+        "outputs": [
+            {
+                "type": "StatusPost",
+                "args": {
+                    "content": "ИИ также создает новые возможности.",
+                    "in_reply_to_id": 1020
+                }
+            }
+        ]
+    }
+]
